@@ -1,8 +1,28 @@
 'use client';
+import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import { LogIn, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
+import { loginUser } from '../actions/authActions';
 
 export default function LoginPage() {
+    const router = useRouter();
+    const [error, setError] = useState('');
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        setError('');
+
+        const formData = new FormData(event.currentTarget);
+        const result = await loginUser(formData);
+
+        if (result?.error) {
+            setError(result.error);
+        } else {
+            router.push('/mark');
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border p-8">
@@ -16,10 +36,16 @@ export default function LoginPage() {
                 </div>
 
                 {/* Login Form */}
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {error ? (
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                            {error}
+                        </div>
+                    ) : null}
                     <div>
                         <label className="block text-sm font-medium mb-1">University Email</label>
                         <input
+                            name="email"
                             type="email"
                             placeholder="name@university.edu"
                             className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
@@ -30,6 +56,7 @@ export default function LoginPage() {
                     <div>
                         <label className="block text-sm font-medium mb-1">Password</label>
                         <input
+                            name="password"
                             type="password"
                             placeholder="••••••••"
                             className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"

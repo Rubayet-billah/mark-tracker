@@ -27,15 +27,11 @@ export async function registerUser(formData: FormData) {
             return { error: "User with this email or ID already exists." };
         }
 
-        console.log({
-            name, email, password
-        });
-
-        // 2. Hash the password for security [cite: 268]
+        // 2. Hash the password [cite: 268, 273]
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Create and save the new user [cite: 251]
-        const newUser = new User({
+        // 3. Directly create the user using the Model
+        const result = await User.create({
             name,
             email,
             universityId,
@@ -43,13 +39,42 @@ export async function registerUser(formData: FormData) {
             password: hashedPassword,
         });
 
+        if (!result) {
+            throw new Error("User creation failed");
+        }
 
-
-        await newUser.save();
-        return { success: "Registration successful! You can now login." };
+        return { success: "Registration successful!" };
 
     } catch (error) {
         console.error("Registration Error:", error);
         return { error: "Something went wrong. Please try again." };
+    }
+}
+
+export async function loginUser(formData: FormData) {
+    try {
+        await connectDB();
+
+        const email = formData.get('email')?.toString().trim() ?? '';
+        const password = formData.get('password')?.toString() ?? '';
+
+        if (!email || !password) {
+            return { error: 'Please enter both email and password.' };
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return { error: 'Invalid email or password.' };
+        }
+
+        const passwordMatches = await bcrypt.compare(password, user.password);
+        if (!passwordMatches) {
+            return { error: 'Invalid email or password.' };
+        }
+
+        return { success: 'Login successful.' };
+    } catch (error) {
+        console.error('Login Error:', error);
+        return { error: 'Unable to login. Please try again.' };
     }
 }
