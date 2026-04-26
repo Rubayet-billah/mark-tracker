@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogIn, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
-import { loginUser } from '../actions/authActions';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -14,13 +14,26 @@ export default function LoginPage() {
         setError('');
 
         const formData = new FormData(event.currentTarget);
-        const result = await loginUser(formData);
+        const email = formData.get('email')?.toString().trim() ?? '';
+        const password = formData.get('password')?.toString() ?? '';
+
+        if (!email || !password) {
+            setError('Please enter both email and password.');
+            return;
+        }
+
+        const result = await signIn('credentials', {
+            redirect: false,
+            email,
+            password,
+        });
 
         if (result?.error) {
-            setError(result.error);
-        } else {
-            router.push('/mark');
+            setError('Invalid email or password.');
+            return;
         }
+
+        router.push('/mark');
     }
 
     return (
