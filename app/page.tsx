@@ -1,40 +1,18 @@
 import Link from 'next/link';
-import { GraduationCap, Upload, Search, ShieldCheck, LogOut } from 'lucide-react';
+import { Upload, Search, ShieldCheck } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 
 export default async function LandingPage() {
-  const session = await auth();
+  const session = await auth(); // Standard Auth.js v5 session check [cite: 380, 396]
+
   if (!session) {
-    return redirect("/login");
+    redirect("/login"); // Protect the route [cite: 388]
   }
   const userRole = session.user?.role;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
-      {/* Navigation */}
-      <nav className="border-b bg-white p-4 flex justify-between items-center shadow-sm">
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <GraduationCap className="text-blue-600" /> MarkTracker
-        </h1>
-        <div className="flex items-center gap-4">
-          {session ? (
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium bg-blue-50 text-blue-700 px-3 py-1 rounded-full capitalize">
-                {userRole} View
-              </span>
-              <Link href="/api/auth/signout" className="text-gray-500 hover:text-red-600">
-                <LogOut size={20} />
-              </Link>
-            </div>
-          ) : (
-            <Link href="/login" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-              Login
-            </Link>
-          )}
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Hero Section */}
       <main className="max-w-5xl mx-auto py-16 px-4 text-center">
         <h2 className="text-4xl font-extrabold mb-4">

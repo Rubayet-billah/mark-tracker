@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // auth.ts
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -48,13 +47,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.role = (user as any).role; // Attach role to token 
+                token.role = user.role; // Attach role to token 
             }
             return token;
         },
         async session({ session, token }) {
             if (token?.role && session.user) {
-                (session.user as any).role = token.role; // Attach role to session 
+                session.user.role = token.role as string; // Attach role to session 
             }
             return session;
         },
