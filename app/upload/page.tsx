@@ -1,22 +1,28 @@
 'use client';
 import { useState } from 'react';
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2 } from 'lucide-react';
-import Papa from 'papaparse'; // [cite: 181, 428]
-import { uploadMarks } from '../actions/markActions';
+import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import Papa from 'papaparse';
+import { previewMarksUpload, commitMarksUpload } from '../actions/markActions';
 
 export default function UploadPage() {
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
     const [loading, setLoading] = useState(false);
+    
+    // Modal states
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [previewData, setPreviewData] = useState<any[]>([]);
+    const [hasExistingMarks, setHasExistingMarks] = useState(false);
 
     const handleFileUpload = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!file) return;
 
         setLoading(true);
+        setStatus(null);
         const formData = new FormData(e.currentTarget);
 
-        // Metadata from dropdowns [cite: 419, 421]
         const courseMetadata = {
             degree: formData.get('degree'),
             session: formData.get('session'),
@@ -25,20 +31,37 @@ export default function UploadPage() {
             courseTitle: formData.get('courseTitle'),
         };
 
-        // Parse CSV on the client side before sending to Server Action [cite: 158, 430]
         Papa.parse(file, {
             header: false,
             skipEmptyLines: true,
             complete: async (results) => {
-                const response = await uploadMarks(courseMetadata, results.data);
+                const response = await previewMarksUpload(courseMetadata, results.data);
                 if (response.error) {
                     setStatus({ type: 'error', msg: response.error });
-                } else {
-                    setStatus({ type: 'success', msg: response.success as string });
+                } else if (response.preview) {
+                    setPreviewData(response.preview);
+                    setHasExistingMarks(response.hasExisting || false);
+                    setIsModalOpen(true);
                 }
                 setLoading(false);
             }
         });
+    };
+
+    const handleConfirmUpload = async () => {
+        setLoading(true);
+        const entries = previewData.map(p => p.entryData);
+        const response = await commitMarksUpload(entries);
+        
+        if (response.error) {
+            setStatus({ type: 'error', msg: response.error });
+        } else {
+            setStatus({ type: 'success', msg: response.success as string });
+            setFile(null); // Reset file
+        }
+        
+        setLoading(false);
+        setIsModalOpen(false);
     };
 
     return (
@@ -49,7 +72,6 @@ export default function UploadPage() {
 
             <form onSubmit={handleFileUpload} className="bg-white shadow-md rounded-xl p-8 border border-gray-100">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {/* Course Metadata Fields [cite: 419] */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Degree</label>
                         <select name="degree" className="w-full border rounded-lg p-2" required>
@@ -101,7 +123,6 @@ export default function UploadPage() {
                     </div>
                 </div>
 
-                {/* File Upload Zone [cite: 73, 157] */}
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition mb-6">
                     <input
                         type="file"
@@ -122,15 +143,114 @@ export default function UploadPage() {
                     type="submit"
                     className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition"
                 >
-                    {loading ? "Processing..." : "Submit Marks"}
+                    {loading ? "Processing..." : "Preview & Check Marks"}
                 </button>
             </form>
 
-            {/* Status Messages  */}
             {status && (
                 <div className={`mt-6 p-4 rounded-lg flex items-center gap-3 ${status.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                     {status.type === 'success' ? <CheckCircle2 /> : <AlertCircle />}
                     {status.msg}
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-800">Preview Marks Upload</h2>
+                                {hasExistingMarks ? (
+                                    <p className="text-amber-600 text-sm mt-1 flex items-center gap-1">
+                                        <AlertCircle size={16} /> Past marks found! New marks will update existing records.
+                                    </p>
+                                ) : (
+                                    <p className="text-gray-500 text-sm mt-1">Review the marks before final submission.</p>
+                                )}
+                            </div>
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body (Table) */}
+                        <div className="p-6 overflow-y-auto bg-gray-50 flex-1">
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                                <table className="w-full text-sm text-left border-collapse">
+                                    <thead className="bg-gray-100 border-b border-gray-200 sticky top-0">
+                                        <tr>
+                                            <th className="px-4 py-3 font-bold text-gray-700">Student ID</th>
+                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Attendance</th>
+                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Assignment</th>
+                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Midterm</th>
+                                            <th className="px-4 py-3 font-bold text-gray-900 text-center bg-gray-200/50">Total (40)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {previewData.map((row, idx) => (
+                                            <tr key={idx} className="hover:bg-gray-50 transition">
+                                                <td className="px-4 py-3 font-medium text-gray-800">{row.studentId}</td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {row.oldMarks && row.oldMarks.attendance !== row.newMarks.attendance && (
+                                                        <span className="text-gray-400 line-through mr-2">{row.oldMarks.attendance}</span>
+                                                    )}
+                                                    <span className={row.oldMarks && row.oldMarks.attendance !== row.newMarks.attendance ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {row.newMarks.attendance}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {row.oldMarks && row.oldMarks.assignment !== row.newMarks.assignment && (
+                                                        <span className="text-gray-400 line-through mr-2">{row.oldMarks.assignment}</span>
+                                                    )}
+                                                    <span className={row.oldMarks && row.oldMarks.assignment !== row.newMarks.assignment ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {row.newMarks.assignment}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    {row.oldMarks && row.oldMarks.midterm !== row.newMarks.midterm && (
+                                                        <span className="text-gray-400 line-through mr-2">{row.oldMarks.midterm}</span>
+                                                    )}
+                                                    <span className={row.oldMarks && row.oldMarks.midterm !== row.newMarks.midterm ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {row.newMarks.midterm}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-center font-bold bg-blue-50/30">
+                                                    {row.oldMarks && row.oldMarks.total_40 !== row.newMarks.total_40 && (
+                                                        <span className="text-gray-400 line-through mr-2 font-normal">{row.oldMarks.total_40}</span>
+                                                    )}
+                                                    <span className={row.oldMarks && row.oldMarks.total_40 !== row.newMarks.total_40 ? "text-blue-700" : "text-gray-800"}>
+                                                        {row.newMarks.total_40}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-white">
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                disabled={loading}
+                                type="button"
+                                className="px-6 py-2.5 rounded-lg font-semibold text-gray-600 hover:bg-gray-100 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleConfirmUpload}
+                                disabled={loading}
+                                type="button"
+                                className="px-6 py-2.5 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition flex items-center gap-2"
+                            >
+                                {loading ? "Uploading..." : "Confirm & Upload"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

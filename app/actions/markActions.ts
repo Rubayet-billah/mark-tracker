@@ -4,11 +4,11 @@ import { auth } from "@/auth";
 import { connectDB } from "@/lib/db";
 import Mark from "@/models/Mark";
 
-export async function uploadMarks(courseData: any, csvRows: any[]) {
+export async function previewMarksUpload(courseData: any, csvRows: any[]) {
     await connectDB();
     const session = await auth();
 
-    // Guard: Only teachers/admins can upload [cite: 113, 162]
+    // Guard: Only teachers/admins can upload
     if (!session || (session.user.role !== 'teacher' && session.user.role !== 'admin')) {
         return { error: "Unauthorized" };
     }
@@ -78,7 +78,47 @@ export async function uploadMarks(courseData: any, csvRows: any[]) {
             });
         }
 
-        // Use bulkWrite or upsert to update existing records if they exist
+        // Fetch existing records to check for past marks
+        const studentIds = entries.map(e => e.studentId);
+        const existingMarks = await Mark.find({
+            courseId: new RegExp(`^${courseData.courseCode}$`, 'i'),
+            session: courseData.session,
+            semester: courseData.semester,
+            studentId: { $in: studentIds }
+        }).lean();
+
+        const existingMap = new Map();
+        existingMarks.forEach((m: any) => existingMap.set(m.studentId, m));
+
+        let hasExisting = false;
+        const previewData = entries.map(entry => {
+            const existing = existingMap.get(entry.studentId);
+            if (existing) hasExisting = true;
+
+            return {
+                studentId: entry.studentId,
+                oldMarks: existing ? existing.marks : null,
+                newMarks: entry.marks,
+                entryData: entry
+            };
+        });
+
+        return { preview: previewData, hasExisting };
+    } catch (error) {
+        console.error("Preview Error:", error);
+        return { error: "Failed to process marks. Check file format." };
+    }
+}
+
+export async function commitMarksUpload(entries: any[]) {
+    await connectDB();
+    const session = await auth();
+
+    if (!session || (session.user.role !== 'teacher' && session.user.role !== 'admin')) {
+        return { error: "Unauthorized" };
+    }
+
+    try {
         const operations = entries.map(entry => ({
             updateOne: {
                 filter: { studentId: entry.studentId, courseId: entry.courseId, session: entry.session },
@@ -91,6 +131,6 @@ export async function uploadMarks(courseData: any, csvRows: any[]) {
         return { success: `Successfully uploaded ${entries.length} student records.` };
     } catch (error) {
         console.error("Upload Error:", error);
-        return { error: "Failed to upload marks. Check file format." };
+        return { error: "Failed to commit marks." };
     }
 }
