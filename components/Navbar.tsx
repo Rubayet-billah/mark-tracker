@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { GraduationCap, LogOut } from 'lucide-react';
-import { auth, signOut } from '@/auth';
+import { auth } from '@/auth';
+import { logoutUser } from '@/app/actions/authActions';
 
 export default async function Navbar() {
   const session = await auth();
@@ -18,12 +19,7 @@ export default async function Navbar() {
           </span>
 
           {/* Sign Out Form using Server Action */}
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
+          <form action={logoutUser}>
             <button
               type="submit"
               className="flex items-center gap-2 text-gray-500 hover:text-red-600 transition-colors"

@@ -3,6 +3,11 @@
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
+import { signOut } from '@/auth';
+
+export async function logoutUser() {
+    await signOut({ redirectTo: "/login" });
+}
 
 export async function registerUser(formData: FormData) {
     try {
