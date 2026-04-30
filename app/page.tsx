@@ -201,24 +201,26 @@ export default async function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">Expected File Format</h3>
                   <p className="text-slate-500 mb-6 text-sm">Ensure your file contains Student ID, CT1, CT2, and Assignment columns.</p>
+
+                  {/* proper grid layout with equal width columns  */}
                   <div className="w-full bg-slate-50 rounded-xl border border-slate-200/60 p-5 font-mono text-sm text-slate-600 overflow-x-auto">
-                    <div className="flex gap-8 border-b border-slate-200 pb-3 mb-3 font-bold text-slate-800">
-                      <span className="w-20">studentId</span>
-                      <span className="w-12">ct1</span>
-                      <span className="w-12">ct2</span>
-                      <span className="w-16">assign</span>
+                    <div className="grid grid-cols-4 gap-8 border-b border-slate-200 pb-3 mb-3 font-bold text-slate-800">
+                      <span >studentId</span>
+                      <span >Assignment</span>
+                      <span >Attendance</span>
+                      <span >Midterm</span>
                     </div>
-                    <div className="flex gap-8">
-                      <span className="w-20">20210001</span>
-                      <span className="w-12 text-blue-600">08</span>
-                      <span className="w-12 text-blue-600">09</span>
-                      <span className="w-16 text-blue-600">18</span>
+                    <div className="grid grid-cols-4 gap-8">
+                      <span >18PHY026</span>
+                      <span >08</span>
+                      <span >09</span>
+                      <span >18</span>
                     </div>
-                    <div className="flex gap-8 mt-3">
-                      <span className="w-20">20210002</span>
-                      <span className="w-12 text-blue-600">10</span>
-                      <span className="w-12 text-blue-600">07</span>
-                      <span className="w-16 text-blue-600">19</span>
+                    <div className="grid grid-cols-4 gap-8 mt-3">
+                      <span >18PHY027</span>
+                      <span >10</span>
+                      <span >07</span>
+                      <span >19</span>
                     </div>
                   </div>
                 </div>
