@@ -8,7 +8,7 @@ export default function UploadPage() {
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
     const [loading, setLoading] = useState(false);
-    
+
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,14 +52,14 @@ export default function UploadPage() {
         setLoading(true);
         const entries = previewData.map(p => p.entryData);
         const response = await commitMarksUpload(entries);
-        
+
         if (response.error) {
             setStatus({ type: 'error', msg: response.error });
         } else {
             setStatus({ type: 'success', msg: response.success as string });
             setFile(null); // Reset file
         }
-        
+
         setLoading(false);
         setIsModalOpen(false);
     };
@@ -115,7 +115,7 @@ export default function UploadPage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Course Code</label>
-                        <input name="courseCode" placeholder="e.g., CSE-301" className="w-full border rounded-lg p-2" required />
+                        <input name="courseCode" placeholder="e.g., PHY301" className="w-full border rounded-lg p-2" required />
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-1">Course Title</label>
@@ -233,7 +233,7 @@ export default function UploadPage() {
 
                         {/* Modal Footer */}
                         <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-white">
-                            <button 
+                            <button
                                 onClick={() => setIsModalOpen(false)}
                                 disabled={loading}
                                 type="button"
@@ -241,7 +241,7 @@ export default function UploadPage() {
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleConfirmUpload}
                                 disabled={loading}
                                 type="button"

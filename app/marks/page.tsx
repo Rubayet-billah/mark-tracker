@@ -92,7 +92,7 @@ export default async function StudentMarksPage(
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Course Code</label>
-                            <input type="text" name="course" defaultValue={course} placeholder="e.g. CSE-301" required className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <input type="text" name="course" defaultValue={course} placeholder="e.g. PHY301" required className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                         </div>
                         {/* {!isStudent && (
                             <div>
