@@ -158,3 +158,45 @@ export async function commitMarksUpload(entries: any[]) {
         return { error: "Failed to commit marks." };
     }
 }
+
+export async function getTeacherStats(instructorId: string) {
+    await connectDB();
+
+    try {
+        const stats = await Mark.aggregate([
+            { $match: { instructorId: instructorId } },
+            {
+                $group: {
+                    _id: { courseId: "$courseId", session: "$session", semester: "$semester" },
+                    courseTitle: { $first: "$courseTitle" },
+                    lastUpdated: { $max: "$updatedAt" },
+                    studentCount: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    courseId: "$_id.courseId",
+                    session: "$_id.session",
+                    semester: "$_id.semester",
+                    courseTitle: 1,
+                    lastUpdated: 1,
+                    studentCount: 1
+                }
+            },
+            { $sort: { lastUpdated: -1 } }
+        ]);
+
+        const totalCourses = stats.length;
+        const totalStudents = stats.reduce((sum: number, course: any) => sum + course.studentCount, 0);
+
+        return {
+            totalCourses,
+            totalStudents,
+            history: stats
+        };
+    } catch (error) {
+        console.error("Failed to fetch teacher stats:", error);
+        return { error: "Failed to fetch teacher stats" };
+    }
+}

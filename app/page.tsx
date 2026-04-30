@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Upload, Search, ShieldCheck, BarChart3, FileSpreadsheet, Lock } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { getTeacherStats } from '@/app/actions/markActions';
 
 export default async function LandingPage() {
   const session = await auth(); 
@@ -11,6 +12,11 @@ export default async function LandingPage() {
   }
   const userRole = session.user?.role;
   const userName = session.user?.name || "User";
+
+  let teacherStats = null;
+  if (userRole === 'teacher' || userRole === 'admin') {
+    teacherStats = await getTeacherStats(session.user?.id as string);
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
@@ -62,6 +68,81 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Teacher Activity Dashboard */}
+      {(userRole === 'teacher' || userRole === 'admin') && teacherStats && teacherStats.history && (
+        <section className="py-16 bg-white border-b border-slate-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-2xl font-bold text-slate-900 mb-8">Teacher Dashboard</h2>
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:shadow-md transition">
+                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                  <FileSpreadsheet size={28} />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium mb-1">Total Courses Managed</p>
+                  <p className="text-3xl font-extrabold text-slate-900">{teacherStats.totalCourses}</p>
+                </div>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:shadow-md transition">
+                <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center">
+                  <BarChart3 size={28} />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 font-medium mb-1">Total Student Records</p>
+                  <p className="text-3xl font-extrabold text-slate-900">{teacherStats.totalStudents}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity Table */}
+            <h3 className="text-xl font-bold text-slate-900 mb-6">Recent Activity Logs</h3>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 text-sm">
+                    <tr>
+                      <th className="px-6 py-4 font-semibold">Course Code</th>
+                      <th className="px-6 py-4 font-semibold">Course Title</th>
+                      <th className="px-6 py-4 font-semibold">Session & Semester</th>
+                      <th className="px-6 py-4 font-semibold text-center">Student Records</th>
+                      <th className="px-6 py-4 font-semibold text-right">Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm">
+                    {teacherStats.history?.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                          No upload history found. Upload marks to see your activity here.
+                        </td>
+                      </tr>
+                    ) : (
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      teacherStats.history?.map((log: any, idx: number) => (
+                        <tr key={idx} className="hover:bg-slate-50 transition">
+                          <td className="px-6 py-4 font-bold text-slate-900">{log.courseId.toUpperCase()}</td>
+                          <td className="px-6 py-4 text-slate-600">{log.courseTitle}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-medium text-xs">
+                              {log.session} ({log.semester})
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center font-bold text-slate-700">{log.studentCount}</td>
+                          <td className="px-6 py-4 text-right text-slate-500">
+                            {new Date(log.lastUpdated).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Upload Marks Section (Dynamic for Teachers) */}
       {(userRole === 'teacher' || userRole === 'admin') && (
