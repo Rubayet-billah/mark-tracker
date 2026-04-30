@@ -3,8 +3,15 @@ import { useState } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import Papa from 'papaparse';
 import { previewMarksUpload, commitMarksUpload } from '../actions/markActions';
+import { useSearchParams } from 'next/navigation';
 
 export default function UploadPage() {
+    const searchParams = useSearchParams();
+    const defaultCourseCode = searchParams.get('courseCode') || '';
+    const defaultCourseTitle = searchParams.get('courseTitle') || '';
+    const defaultSession = searchParams.get('session') || '';
+    const defaultSemester = searchParams.get('semester') || '';
+    const defaultDegree = searchParams.get('degree') || 'BSc';
     const [file, setFile] = useState<File | null>(null);
     const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
     const [loading, setLoading] = useState(false);
@@ -93,14 +100,14 @@ export default function UploadPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>
                         <label className="block text-sm font-medium mb-1">Degree</label>
-                        <select name="degree" className="w-full border rounded-lg p-2" required>
+                        <select name="degree" className="w-full border rounded-lg p-2" required defaultValue={defaultDegree}>
                             <option value="BSc">BSc</option>
                             <option value="MSc">MSc</option>
                         </select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Session</label>
-                        <select name="session" className="w-full border rounded-lg p-2" required defaultValue="">
+                        <select name="session" className="w-full border rounded-lg p-2" required defaultValue={defaultSession}>
                             <option value="" disabled>Select Session</option>
                             <option value="2018-19">2018-19</option>
                             <option value="2019-20">2019-20</option>
@@ -118,7 +125,7 @@ export default function UploadPage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Semester</label>
-                        <select name="semester" className="w-full border rounded-lg p-2" required defaultValue="">
+                        <select name="semester" className="w-full border rounded-lg p-2" required defaultValue={defaultSemester}>
                             <option value="" disabled>Select Semester</option>
                             <option value="1.1">1.1</option>
                             <option value="1.2">1.2</option>
@@ -134,11 +141,11 @@ export default function UploadPage() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium mb-1">Course Code</label>
-                        <input name="courseCode" placeholder="e.g., PHY301" className="w-full border rounded-lg p-2" required />
+                        <input name="courseCode" placeholder="e.g., PHY301" className="w-full border rounded-lg p-2" required defaultValue={defaultCourseCode} />
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-1">Course Title</label>
-                        <input name="courseTitle" placeholder="e.g., Database Management Systems" className="w-full border rounded-lg p-2" required />
+                        <input name="courseTitle" placeholder="e.g., Database Management Systems" className="w-full border rounded-lg p-2" required defaultValue={defaultCourseTitle} />
                     </div>
                 </div>
 

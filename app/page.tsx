@@ -46,10 +46,16 @@ export default async function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {(userRole === 'teacher' || userRole === 'admin') && (
-              <Link href="/upload" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2">
-                <Upload size={20} />
-                Upload Marks
-              </Link>
+              <>
+                <Link href="/dashboard/teacher" className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                  <BarChart3 size={20} />
+                  Teacher Dashboard
+                </Link>
+                <Link href="/upload" className="w-full sm:w-auto px-8 py-4 bg-white text-slate-900 border border-slate-200 rounded-full font-medium hover:bg-slate-50 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                  <Upload size={20} />
+                  Upload Marks
+                </Link>
+              </>
             )}
             
             {(userRole === 'student' || userRole === 'admin') && (

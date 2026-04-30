@@ -200,3 +200,25 @@ export async function getTeacherStats(instructorId: string) {
         return { error: "Failed to fetch teacher stats" };
     }
 }
+
+export async function getCourseStudents(instructorId: string, courseId: string, sessionStr: string, semester: string) {
+    await connectDB();
+    try {
+        const marks = await Mark.find({
+            instructorId,
+            courseId: new RegExp(`^${courseId}$`, 'i'),
+            session: sessionStr,
+            semester
+        }).sort({ studentId: 1 }).lean();
+        return marks;
+    } catch (error) {
+        console.error("Failed to fetch course students:", error);
+        return [];
+    }
+}
+
+export async function getTeacherCourses(instructorId: string) {
+    // Alias to satisfy requirements while keeping DRY
+    const stats = await getTeacherStats(instructorId);
+    return stats.history || [];
+}
