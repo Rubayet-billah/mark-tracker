@@ -40,8 +40,8 @@ export default async function LandingPage() {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
-            The modern platform to effortlessly manage and view 10+10+20 internal marks. No more hunting through spreadsheets. Access everything instantly in one secure place.
+          <p className="text-lg md:text-xl text-slate-700 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
+            The modern platform to effortlessly manage and view <strong>Attendance, Assignment and Midterm marks</strong>. No more hunting through spreadsheets. Access everything instantly in one secure place.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -88,7 +88,7 @@ export default async function LandingPage() {
                   <FileSpreadsheet size={28} />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 font-medium mb-1">Total Courses Managed</p>
+                  <p className="text-sm text-slate-700 font-medium mb-1">Total Courses Managed</p>
                   <p className="text-3xl font-extrabold text-slate-900">{teacherStats.totalCourses}</p>
                 </div>
               </div>
@@ -97,7 +97,7 @@ export default async function LandingPage() {
                   <BarChart3 size={28} />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500 font-medium mb-1">Total Student Records</p>
+                  <p className="text-sm text-slate-700 font-medium mb-1">Total Student Records</p>
                   <p className="text-3xl font-extrabold text-slate-900">{teacherStats.totalStudents}</p>
                 </div>
               </div>
@@ -120,7 +120,7 @@ export default async function LandingPage() {
                   <tbody className="divide-y divide-slate-100 text-sm">
                     {teacherStats.history?.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                        <td colSpan={5} className="px-6 py-8 text-center text-slate-700">
                           No upload history found. Upload marks to see your activity here.
                         </td>
                       </tr>
@@ -136,7 +136,7 @@ export default async function LandingPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center font-bold text-slate-700">{log.studentCount}</td>
-                          <td className="px-6 py-4 text-right text-slate-500">
+                          <td className="px-6 py-4 text-right text-slate-700">
                             {new Date(log.lastUpdated).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </td>
                         </tr>
@@ -166,7 +166,7 @@ export default async function LandingPage() {
                   For Educators
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-6 text-slate-900 tracking-tight">Seamlessly Upload Course Marks</h2>
-                <p className="text-lg text-slate-500 mb-8 leading-relaxed font-light">
+                <p className="text-lg text-slate-700 mb-8 leading-relaxed font-light">
                   Our bulk upload tool allows you to process your entire class&apos;s internal marks via CSV or Excel in seconds. Simply format your spreadsheet, upload the file, and let our system handle the validation and storage.
                 </p>
                 <ul className="space-y-4 mb-10">
@@ -200,7 +200,7 @@ export default async function LandingPage() {
                     <FileSpreadsheet size={28} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Expected File Format</h3>
-                  <p className="text-slate-500 mb-6 text-sm">Ensure your file contains Student ID, CT1, CT2, and Assignment columns.</p>
+                  <p className="text-slate-700 mb-6 text-sm">Ensure your file contains Student ID, CT1, CT2, and Assignment columns.</p>
 
                   {/* proper grid layout with equal width columns  */}
                   <div className="w-full bg-slate-50 rounded-xl border border-slate-200/60 p-5 font-mono text-sm text-slate-600 overflow-x-auto">
@@ -235,7 +235,7 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Built for Clarity</h2>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto font-light">From the ground up, we designed Mark Tracker to provide a secure, fast, and transparent grading experience.</p>
+            <p className="text-lg text-slate-700 max-w-2xl mx-auto font-light">From the ground up, we designed Mark Tracker to provide a secure, fast, and transparent grading experience.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -264,7 +264,7 @@ export default async function LandingPage() {
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-slate-900 tracking-tight">{feature.title}</h3>
-                <p className="text-slate-500 leading-relaxed font-light">{feature.description}</p>
+                <p className="text-slate-700 leading-relaxed font-light">{feature.description}</p>
               </div>
             ))}
           </div>
