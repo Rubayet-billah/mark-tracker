@@ -15,17 +15,30 @@ export async function registerUser(formData: FormData) {
 
         const name = formData.get('name') as string;
         const email = formData.get('email') as string;
-        const universityId = formData.get('universityId')?.toString().trim() ?? '';
+        let universityId = formData.get('universityId')?.toString().trim() ?? '';
         const role = formData.get('role')?.toString().trim() || 'student';
         const password = formData.get('password')?.toString() ?? '';
 
-        if (!name || !email || !universityId || !password) {
+        if (!name || !email || !password) {
             return { error: 'Please fill in all required fields.' };
         }
 
+        if (role === 'student' && !universityId) {
+            return { error: 'University ID is required for students.' };
+        }
+
+        if (role === 'teacher' && !universityId) {
+            universityId = `teacher-${email}`;
+        }
+
         // 1. Check if user already exists by Email or University ID [cite: 250, 269]
+        const orConditions: Record<string, string>[] = [{ email }];
+        if (role === 'student' && universityId) {
+            orConditions.push({ universityId });
+        }
+
         const existingUser = await User.findOne({
-            $or: [{ email }, { universityId }]
+            $or: orConditions
         });
 
         if (existingUser) {

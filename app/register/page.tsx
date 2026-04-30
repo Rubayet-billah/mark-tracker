@@ -1,13 +1,15 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { UserPlus, GraduationCap, User, Mail, Hash } from 'lucide-react';
 import Link from 'next/link';
 import { registerUser } from '../actions/authActions';
+import { twMerge } from 'tw-merge';
 
 export default function RegisterPage() {
     const router = useRouter();
     const [error, setError] = useState('');
+    const [role, setRole] = useState('student');
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -39,6 +41,23 @@ export default function RegisterPage() {
                             {error}
                         </div>
                     ) : null}
+                    {/* Role Selection */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">I am a:</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <label className="flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-checked:border-green-500 has-checked:bg-green-50">
+                                <input type="radio" name="role" value="student" className="hidden" checked={role === 'student'} onChange={(e) => setRole(e.target.value)} />
+                                <User size={18} />
+                                <span>Student</span>
+                            </label>
+                            <label className="flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-checked:border-green-500 has-checked:bg-green-50">
+                                <input type="radio" name="role" value="teacher" className="hidden" checked={role === 'teacher'} onChange={(e) => setRole(e.target.value)} />
+                                <GraduationCap size={18} />
+                                <span>Teacher</span>
+                            </label>
+                        </div>
+                    </div>
+
                     {/* Full Name */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -49,11 +68,18 @@ export default function RegisterPage() {
                     </div>
 
                     {/* University ID */}
-                    <div>
+                    <div className={twMerge(`transition-opacity duration-200 ${role === 'teacher' ? 'opacity-50' : ''}`)}>
                         <label className="block text-sm font-medium mb-1">University ID</label>
                         <div className="relative">
                             <Hash className="absolute left-3 top-3 text-gray-400" size={18} />
-                            <input name="universityId" type="text" placeholder="20210001" className="w-full border pl-10 p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-green-500" required />
+                            <input
+                                name="universityId"
+                                type="text"
+                                placeholder="20210001"
+                                className={`w-full border pl-10 p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-green-500 ${role === 'teacher' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                required={role === 'student'}
+                                disabled={role === 'teacher'}
+                            />
                         </div>
                     </div>
 
@@ -75,22 +101,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Role Selection */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">I am a:</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <label className="flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
-                                <input type="radio" name="role" value="student" className="hidden" defaultChecked />
-                                <User size={18} />
-                                <span>Student</span>
-                            </label>
-                            <label className="flex items-center justify-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
-                                <input type="radio" name="role" value="teacher" className="hidden" />
-                                <GraduationCap size={18} />
-                                <span>Teacher</span>
-                            </label>
-                        </div>
-                    </div>
+
 
                     <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition mt-4">
                         Register Now
