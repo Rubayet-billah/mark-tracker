@@ -19,7 +19,7 @@ export default async function ManageCoursePage(props: { params: Promise<{ course
     }
 
     const students = await getCourseStudents(sessionUser.user.id, courseId, session, semester);
-    
+
     // We can infer courseTitle and degree from the first student record
     const courseTitle = students.length > 0 ? students[0].courseTitle : "Unknown Course";
     const degree = students.length > 0 ? students[0].degree : "Unknown Degree";
@@ -42,24 +42,38 @@ export default async function ManageCoursePage(props: { params: Promise<{ course
                 </Link>
 
                 {/* Header Card */}
-                <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <div className="flex items-center gap-3 mb-3">
-                            <span className="px-3 py-1 bg-blue-100 text-blue-800 font-bold rounded-lg text-sm tracking-wide">
+                <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-bl from-blue-50 to-transparent rounded-full -mr-20 -mt-20 opacity-60"></div>
+
+                    <div className="relative z-10">
+                        <div className="flex flex-wrap items-center gap-3 mb-4">
+                            <span className="px-4 py-1.5 bg-blue-600 text-white font-bold rounded-full text-sm tracking-wide shadow-md">
                                 {courseId.toUpperCase()}
                             </span>
-                            <span className="px-3 py-1 bg-slate-100 text-slate-600 font-semibold rounded-lg text-sm">
-                                {session} • {semester}
-                            </span>
+
+                            {/* Highlighted Session & Semester */}
+                            <div className="flex items-center bg-amber-50 border border-amber-200 rounded-full py-1 shadow-sm">
+                                <span className="px-4 py-0.5 text-amber-800 font-bold text-sm border-r border-amber-200 flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                    Session: {session}
+                                </span>
+                                <span className="px-4 py-0.5 text-amber-800 font-bold text-sm">
+                                    Semester: {semester}
+                                </span>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-slate-900 mb-2">{courseTitle}</h1>
-                        <p className="text-slate-500 font-medium flex items-center gap-2">
-                            <GraduationCap size={18} /> {degree} Program • <Users size={18} className="ml-2" /> {students.length} Enrolled Students
+                        <h1 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">{courseTitle}</h1>
+                        <p className="text-slate-600 font-medium flex items-center gap-3 bg-slate-50 w-fit px-4 py-2 rounded-lg border border-slate-100">
+                            <GraduationCap size={18} className="text-blue-500" />
+                            <span>{degree} Program</span>
+                            <span className="text-slate-300">|</span>
+                            <Users size={18} className="text-green-500" />
+                            <span>{students.length} Enrolled Students</span>
                         </p>
                     </div>
 
-                    <Link href={`/upload?${uploadParams}`} className="px-6 py-3 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition flex items-center gap-2 shadow-sm whitespace-nowrap">
-                        <Upload size={18} /> Update Marks
+                    <Link href={`/upload?${uploadParams}`} className="relative z-10 px-8 py-4 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 shadow-md whitespace-nowrap">
+                        <Upload size={20} /> Update Marks
                     </Link>
                 </div>
 

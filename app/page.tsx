@@ -5,10 +5,10 @@ import { auth } from '@/auth';
 import { getTeacherStats } from '@/app/actions/markActions';
 
 export default async function LandingPage() {
-  const session = await auth(); 
+  const session = await auth();
 
   if (!session) {
-    redirect("/login"); 
+    redirect("/login");
   }
   const userRole = session.user?.role;
   const userName = session.user?.name || "User";
@@ -20,26 +20,26 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
-      
+
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden border-b border-slate-100">
         <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_60%,transparent_100%)]"></div>
         <div className="absolute top-0 right-0 -z-10 w-[800px] h-[800px] bg-blue-50 rounded-full blur-[100px] opacity-60 transform translate-x-1/3 -translate-y-1/3"></div>
         <div className="absolute bottom-0 left-0 -z-10 w-[600px] h-[600px] bg-green-50 rounded-full blur-[80px] opacity-60 transform -translate-x-1/3 translate-y-1/3"></div>
-        
+
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-slate-600 text-sm font-medium mb-8 border border-slate-200 shadow-sm">
             <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
             Welcome back, {userName}
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 max-w-4xl mx-auto leading-[1.1]">
-            Academic Tracking, <br/>
+            Academic Tracking, <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500">
               Simplified for Everyone.
             </span>
           </h1>
-          
+
           <p className="text-lg md:text-xl text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed font-light">
             The modern platform to effortlessly manage and view 10+10+20 internal marks. No more hunting through spreadsheets. Access everything instantly in one secure place.
           </p>
@@ -57,7 +57,7 @@ export default async function LandingPage() {
                 </Link>
               </>
             )}
-            
+
             {(userRole === 'student' || userRole === 'admin') && (
               <Link href="/marks" className={`w-full sm:w-auto px-8 py-4 rounded-full font-medium transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 ${userRole === 'student' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-slate-900 border border-slate-200 hover:border-slate-300'}`}>
                 <Search size={20} />
@@ -80,7 +80,7 @@ export default async function LandingPage() {
         <section className="py-16 bg-white border-b border-slate-100">
           <div className="max-w-7xl mx-auto px-6">
             <h2 className="text-2xl font-bold text-slate-900 mb-8">Teacher Dashboard</h2>
-            
+
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:shadow-md transition">
@@ -146,6 +146,12 @@ export default async function LandingPage() {
                 </table>
               </div>
             </div>
+            <div className="flex items-center justify-center mt-8">
+              <Link href="/dashboard/teacher" className="w-fit px-8 py-4 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition-all hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                <BarChart3 size={20} />
+                Teacher Dashboard
+              </Link>
+            </div>
           </div>
         </section>
       )}
@@ -191,7 +197,7 @@ export default async function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 to-green-50 rounded-3xl transform rotate-3 scale-105 -z-10"></div>
                 <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-xl">
                   <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-                     <FileSpreadsheet size={28} />
+                    <FileSpreadsheet size={28} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Expected File Format</h3>
                   <p className="text-slate-500 mb-6 text-sm">Ensure your file contains Student ID, CT1, CT2, and Assignment columns.</p>
@@ -229,7 +235,7 @@ export default async function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Built for Clarity</h2>
             <p className="text-lg text-slate-500 max-w-2xl mx-auto font-light">From the ground up, we designed Mark Tracker to provide a secure, fast, and transparent grading experience.</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
