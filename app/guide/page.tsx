@@ -38,12 +38,33 @@ export default function UserGuidePage() {
                     <section>
                         <h2 className="text-2xl font-bold mb-6 flex items-center gap-3 text-slate-900">
                             <CheckCircle2 className="text-green-500" />
-                            Unified Academic Tracking
+                            Why Mark Tracker?
                         </h2>
-                        <p className="text-slate-600 leading-relaxed mb-4 text-lg">
-                            Our platform acts as a <strong>"Single Source of Truth,"</strong> replacing scattered, non-trackable PDFs and spreadsheets with a centralized, searchable academic database.
-                            The system securely stores all your internal marks in one place, ensuring data integrity and instant access.
+                        <p className="text-slate-600 leading-relaxed mb-6 text-lg">
+                            The purpose of this project is to end the <strong>"PDF Problem."</strong> Currently, academic marks are often shared as grainy images or scattered files in messaging apps, making them impossible to search or track over time.
                         </p>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                                <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                                    <Search size={20} />
+                                    For Students
+                                </h3>
+                                <p className="text-sm text-slate-600 leading-relaxed">
+                                    No more hunting through old group chat messages. Log in to see your <strong>full academic history</strong> in one clean, searchable table anytime you need it.
+                                </p>
+                            </div>
+
+                            <div className="bg-green-50 p-6 rounded-2xl border border-green-100">
+                                <h3 className="font-bold text-green-900 mb-2 flex items-center gap-2">
+                                    <UploadCloud size={20} />
+                                    For Teachers
+                                </h3>
+                                <p className="text-sm text-slate-600 leading-relaxed">
+                                    Stop managing dozens of separate spreadsheets. Upload your marks once, and the system handles the <strong>organization, calculations, and secure storage</strong> for you.
+                                </p>
+                            </div>
+                        </div>
                     </section>
 
                     {/* Section 2: Role-Based Access */}
@@ -95,15 +116,15 @@ export default function UserGuidePage() {
                                     2. The "Student Id" Rule
                                 </h3>
                                 <p className="text-sm text-slate-600 mb-3">
-                                    To map marks correctly, your CSV <strong>MUST</strong> contain a <code className="font-semibold text-red-600 bg-red-50 px-1 py-0.5 rounded">Student Id</code> column. While the system is <strong>case-insensitive</strong> (e.g., "student id" or "STUDENT ID" works fine), the header name itself must strictly be "Student Id". 
+                                    To map marks correctly, your CSV <strong>MUST</strong> contain a <code className="font-semibold text-red-600 bg-red-50 px-1 py-0.5 rounded">Student Id</code> column. While the system is <strong>case-insensitive</strong> (e.g., "student id" or "STUDENT ID" works fine), the header name itself must strictly be "Student Id".
                                 </p>
                                 <p className="text-sm text-slate-600 mb-4">
                                     Do not use "University ID", "Roll No", or any other variant. Other headers like <code className="font-semibold text-slate-700 bg-slate-100 px-1 py-0.5 rounded">Attendance</code>, <code className="font-semibold text-slate-700 bg-slate-100 px-1 py-0.5 rounded">Assignment</code>, and <code className="font-semibold text-slate-700 bg-slate-100 px-1 py-0.5 rounded">Midterm</code> are supported for partial uploads. Here is an example of the expected CSV format:
                                 </p>
                                 <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-50">
-                                    <img 
-                                        src="/assets/upload-format-1.png" 
-                                        alt="Correct CSV Format Example" 
+                                    <img
+                                        src="/assets/upload-format-1.png"
+                                        alt="Correct CSV Format Example"
                                         className="w-full h-auto object-contain"
                                     />
                                 </div>
