@@ -56,10 +56,9 @@ export async function previewMarksUpload(courseData: any, csvRows: any[]) {
             const studentId = String(row[studentIdIdx]).trim();
             if (!studentId) continue;
 
-            const attendance = attendanceIdx !== -1 ? Number(row[attendanceIdx]) || 0 : 0;
-            const assignment = assignmentIdx !== -1 ? Number(row[assignmentIdx]) || 0 : 0;
-            const midterm = midtermIdx !== -1 ? Number(row[midtermIdx]) || 0 : 0;
-            const total = totalIdx !== -1 ? Number(row[totalIdx]) : (attendance + assignment + midterm);
+            const attendance = attendanceIdx !== -1 ? Number(row[attendanceIdx]) || 0 : null;
+            const assignment = assignmentIdx !== -1 ? Number(row[assignmentIdx]) || 0 : null;
+            const midterm = midtermIdx !== -1 ? Number(row[midtermIdx]) || 0 : null;
 
             entries.push({
                 studentId,
@@ -73,7 +72,7 @@ export async function previewMarksUpload(courseData: any, csvRows: any[]) {
                     attendance,
                     assignment,
                     midterm,
-                    total_40: total
+                    uploadedTotal: totalIdx !== -1 ? Number(row[totalIdx]) : null
                 }
             });
         }
@@ -90,16 +89,41 @@ export async function previewMarksUpload(courseData: any, csvRows: any[]) {
         const existingMap = new Map();
         existingMarks.forEach((m: any) => existingMap.set(m.studentId, m));
 
+        const uploadTypes = courseData.uploadTypes || [];
+
         let hasExisting = false;
         const previewData = entries.map(entry => {
             const existing = existingMap.get(entry.studentId);
             if (existing) hasExisting = true;
 
+            const newMarksObj = { ...(existing?.marks || {}) };
+            
+            if (uploadTypes.includes('attendance') && entry.marks.attendance !== null) {
+                newMarksObj.attendance = entry.marks.attendance;
+            }
+            if (uploadTypes.includes('assignment') && entry.marks.assignment !== null) {
+                newMarksObj.assignment = entry.marks.assignment;
+            }
+            if (uploadTypes.includes('midterm') && entry.marks.midterm !== null) {
+                newMarksObj.midterm = entry.marks.midterm;
+            }
+
+            // Recalculate total
+            if (entry.marks.uploadedTotal !== null && uploadTypes.includes('total')) {
+                newMarksObj.total_40 = entry.marks.uploadedTotal;
+            } else {
+                newMarksObj.total_40 = (newMarksObj.attendance || 0) + (newMarksObj.assignment || 0) + (newMarksObj.midterm || 0);
+            }
+
+            // Clean up entry object
+            const finalEntry = { ...entry, marks: newMarksObj };
+
             return {
                 studentId: entry.studentId,
                 oldMarks: existing ? existing.marks : null,
-                newMarks: entry.marks,
-                entryData: entry
+                newMarks: newMarksObj,
+                rawCsvMarks: entry.marks,
+                entryData: finalEntry
             };
         });
 

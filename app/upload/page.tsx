@@ -15,6 +15,13 @@ export default function UploadPage() {
     const [previewData, setPreviewData] = useState<any[]>([]);
     const [hasExistingMarks, setHasExistingMarks] = useState(false);
 
+    // Types of marks to upload
+    const [uploadTypes, setUploadTypes] = useState({
+        attendance: true,
+        assignment: true,
+        midterm: true
+    });
+
     const handleFileUpload = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!file) return;
@@ -29,6 +36,7 @@ export default function UploadPage() {
             semester: formData.get('semester'),
             courseCode: formData.get('courseCode'),
             courseTitle: formData.get('courseTitle'),
+            uploadTypes: Object.keys(uploadTypes).filter(k => uploadTypes[k as keyof typeof uploadTypes])
         };
 
         Papa.parse(file, {
@@ -50,7 +58,18 @@ export default function UploadPage() {
 
     const handleConfirmUpload = async () => {
         setLoading(true);
-        const entries = previewData.map(p => p.entryData);
+        const entries = previewData.map(row => {
+            const computedNewMarks = { ...(row.oldMarks || {}) };
+            if (uploadTypes.attendance && row.rawCsvMarks.attendance !== null) computedNewMarks.attendance = row.rawCsvMarks.attendance;
+            if (uploadTypes.assignment && row.rawCsvMarks.assignment !== null) computedNewMarks.assignment = row.rawCsvMarks.assignment;
+            if (uploadTypes.midterm && row.rawCsvMarks.midterm !== null) computedNewMarks.midterm = row.rawCsvMarks.midterm;
+            computedNewMarks.total_40 = (computedNewMarks.attendance || 0) + (computedNewMarks.assignment || 0) + (computedNewMarks.midterm || 0);
+            
+            return {
+                ...row.entryData,
+                marks: computedNewMarks
+            };
+        });
         const response = await commitMarksUpload(entries);
 
         if (response.error) {
@@ -159,18 +178,33 @@ export default function UploadPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
                         {/* Modal Header */}
-                        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-800">Preview Marks Upload</h2>
+                        <div className="flex justify-between items-start p-6 border-b border-gray-100">
+                            <div className="flex-1">
+                                <h2 className="text-xl font-bold text-gray-800 mb-3">Preview & Select Marks</h2>
+                                <div className="inline-flex flex-wrap items-center gap-4 bg-gray-50/80 border border-gray-200 p-3 rounded-lg mb-2">
+                                    <span className="text-sm font-semibold text-gray-700">Uploading:</span>
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-sm font-medium hover:text-blue-600 transition">
+                                        <input type="checkbox" checked={uploadTypes.attendance} onChange={(e) => setUploadTypes({...uploadTypes, attendance: e.target.checked})} className="w-4 h-4 text-blue-600 rounded" />
+                                        Attendance
+                                    </label>
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-sm font-medium hover:text-blue-600 transition">
+                                        <input type="checkbox" checked={uploadTypes.assignment} onChange={(e) => setUploadTypes({...uploadTypes, assignment: e.target.checked})} className="w-4 h-4 text-blue-600 rounded" />
+                                        Assignment
+                                    </label>
+                                    <label className="flex items-center gap-1.5 cursor-pointer text-sm font-medium hover:text-blue-600 transition">
+                                        <input type="checkbox" checked={uploadTypes.midterm} onChange={(e) => setUploadTypes({...uploadTypes, midterm: e.target.checked})} className="w-4 h-4 text-blue-600 rounded" />
+                                        Midterm
+                                    </label>
+                                </div>
                                 {hasExistingMarks ? (
-                                    <p className="text-amber-600 text-sm mt-1 flex items-center gap-1">
+                                    <p className="text-amber-600 text-sm mt-2 flex items-center gap-1 font-medium">
                                         <AlertCircle size={16} /> Past marks found! New marks will update existing records.
                                     </p>
                                 ) : (
-                                    <p className="text-gray-500 text-sm mt-1">Review the marks before final submission.</p>
+                                    <p className="text-gray-500 text-sm mt-2">Review the marks before final submission.</p>
                                 )}
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 ml-4">
                                 <X size={24} />
                             </button>
                         </div>
@@ -182,50 +216,64 @@ export default function UploadPage() {
                                     <thead className="bg-gray-100 border-b border-gray-200 sticky top-0">
                                         <tr>
                                             <th className="px-4 py-3 font-bold text-gray-700">Student ID</th>
-                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Attendance</th>
-                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Assignment</th>
-                                            <th className="px-4 py-3 font-bold text-gray-700 text-center">Midterm</th>
+                                            <th className={`px-4 py-3 font-bold text-center ${!uploadTypes.attendance ? 'text-gray-400' : 'text-gray-700'}`}>
+                                                Attendance {!uploadTypes.attendance && <span className="block text-[10px] font-normal uppercase mt-0.5">(Ignored)</span>}
+                                            </th>
+                                            <th className={`px-4 py-3 font-bold text-center ${!uploadTypes.assignment ? 'text-gray-400' : 'text-gray-700'}`}>
+                                                Assignment {!uploadTypes.assignment && <span className="block text-[10px] font-normal uppercase mt-0.5">(Ignored)</span>}
+                                            </th>
+                                            <th className={`px-4 py-3 font-bold text-center ${!uploadTypes.midterm ? 'text-gray-400' : 'text-gray-700'}`}>
+                                                Midterm {!uploadTypes.midterm && <span className="block text-[10px] font-normal uppercase mt-0.5">(Ignored)</span>}
+                                            </th>
                                             <th className="px-4 py-3 font-bold text-gray-900 text-center bg-gray-200/50">Total (40)</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {previewData.map((row, idx) => (
+                                        {previewData.map((row, idx) => {
+                                            const computedNewMarks = { ...(row.oldMarks || {}) };
+                                            if (uploadTypes.attendance && row.rawCsvMarks.attendance !== null) computedNewMarks.attendance = row.rawCsvMarks.attendance;
+                                            if (uploadTypes.assignment && row.rawCsvMarks.assignment !== null) computedNewMarks.assignment = row.rawCsvMarks.assignment;
+                                            if (uploadTypes.midterm && row.rawCsvMarks.midterm !== null) computedNewMarks.midterm = row.rawCsvMarks.midterm;
+                                            computedNewMarks.total_40 = (computedNewMarks.attendance || 0) + (computedNewMarks.assignment || 0) + (computedNewMarks.midterm || 0);
+
+                                            return (
                                             <tr key={idx} className="hover:bg-gray-50 transition">
                                                 <td className="px-4 py-3 font-medium text-gray-800">{row.studentId}</td>
-                                                <td className="px-4 py-3 text-center">
-                                                    {row.oldMarks && row.oldMarks.attendance !== row.newMarks.attendance && (
+                                                <td className={`px-4 py-3 text-center ${!uploadTypes.attendance ? 'opacity-40 bg-gray-50' : ''}`}>
+                                                    {row.oldMarks && row.oldMarks.attendance !== computedNewMarks.attendance && uploadTypes.attendance && (
                                                         <span className="text-gray-400 line-through mr-2">{row.oldMarks.attendance}</span>
                                                     )}
-                                                    <span className={row.oldMarks && row.oldMarks.attendance !== row.newMarks.attendance ? "text-blue-600 font-bold" : "text-gray-600"}>
-                                                        {row.newMarks.attendance}
+                                                    <span className={row.oldMarks && row.oldMarks.attendance !== computedNewMarks.attendance && uploadTypes.attendance ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {computedNewMarks.attendance ?? '-'}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-center">
-                                                    {row.oldMarks && row.oldMarks.assignment !== row.newMarks.assignment && (
+                                                <td className={`px-4 py-3 text-center ${!uploadTypes.assignment ? 'opacity-40 bg-gray-50' : ''}`}>
+                                                    {row.oldMarks && row.oldMarks.assignment !== computedNewMarks.assignment && uploadTypes.assignment && (
                                                         <span className="text-gray-400 line-through mr-2">{row.oldMarks.assignment}</span>
                                                     )}
-                                                    <span className={row.oldMarks && row.oldMarks.assignment !== row.newMarks.assignment ? "text-blue-600 font-bold" : "text-gray-600"}>
-                                                        {row.newMarks.assignment}
+                                                    <span className={row.oldMarks && row.oldMarks.assignment !== computedNewMarks.assignment && uploadTypes.assignment ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {computedNewMarks.assignment ?? '-'}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-center">
-                                                    {row.oldMarks && row.oldMarks.midterm !== row.newMarks.midterm && (
+                                                <td className={`px-4 py-3 text-center ${!uploadTypes.midterm ? 'opacity-40 bg-gray-50' : ''}`}>
+                                                    {row.oldMarks && row.oldMarks.midterm !== computedNewMarks.midterm && uploadTypes.midterm && (
                                                         <span className="text-gray-400 line-through mr-2">{row.oldMarks.midterm}</span>
                                                     )}
-                                                    <span className={row.oldMarks && row.oldMarks.midterm !== row.newMarks.midterm ? "text-blue-600 font-bold" : "text-gray-600"}>
-                                                        {row.newMarks.midterm}
+                                                    <span className={row.oldMarks && row.oldMarks.midterm !== computedNewMarks.midterm && uploadTypes.midterm ? "text-blue-600 font-bold" : "text-gray-600"}>
+                                                        {computedNewMarks.midterm ?? '-'}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-center font-bold bg-blue-50/30">
-                                                    {row.oldMarks && row.oldMarks.total_40 !== row.newMarks.total_40 && (
+                                                    {row.oldMarks && row.oldMarks.total_40 !== computedNewMarks.total_40 && (
                                                         <span className="text-gray-400 line-through mr-2 font-normal">{row.oldMarks.total_40}</span>
                                                     )}
-                                                    <span className={row.oldMarks && row.oldMarks.total_40 !== row.newMarks.total_40 ? "text-blue-700" : "text-gray-800"}>
-                                                        {row.newMarks.total_40}
+                                                    <span className={row.oldMarks && row.oldMarks.total_40 !== computedNewMarks.total_40 ? "text-blue-700" : "text-gray-800"}>
+                                                        {computedNewMarks.total_40}
                                                     </span>
                                                 </td>
                                             </tr>
-                                        ))}
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
