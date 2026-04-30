@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import Papa from 'papaparse';
 import { previewMarksUpload, commitMarksUpload } from '../actions/markActions';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function UploadPage() {
+function UploadForm() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const defaultCourseCode = searchParams.get('courseCode') || '';
     const defaultCourseTitle = searchParams.get('courseTitle') || '';
     const defaultSession = searchParams.get('session') || '';
@@ -81,13 +83,15 @@ export default function UploadPage() {
 
         if (response.error) {
             setStatus({ type: 'error', msg: response.error });
+            setLoading(false);
+            setIsModalOpen(false);
         } else {
             setStatus({ type: 'success', msg: response.success as string });
             setFile(null); // Reset file
+            setLoading(false);
+            setIsModalOpen(false);
+            router.push('/dashboard/teacher');
         }
-
-        setLoading(false);
-        setIsModalOpen(false);
     };
 
     return (
@@ -309,5 +313,19 @@ export default function UploadPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function UploadPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="animate-pulse flex items-center gap-2 text-blue-600 font-medium">
+                    <Upload className="animate-bounce" size={20} /> Loading Upload Portal...
+                </div>
+            </div>
+        }>
+            <UploadForm />
+        </Suspense>
     );
 }
