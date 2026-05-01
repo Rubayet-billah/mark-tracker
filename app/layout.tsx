@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AppSessionProvider from "@/components/SessionProvider";
+import FeedbackWidget from "@/components/FeedbackWidget";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <FeedbackWidget />
         </AppSessionProvider>
       </body>
     </html>

@@ -3,6 +3,7 @@ import { Upload, Search, ShieldCheck, BarChart3, FileSpreadsheet, Lock } from 'l
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getTeacherStats } from '@/app/actions/markActions';
+import FeedbackSection from '@/components/FeedbackSection';
 
 export default async function LandingPage() {
   const session = await auth();
@@ -270,6 +271,8 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      <FeedbackSection />
 
     </div>
   );
