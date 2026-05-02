@@ -1,6 +1,7 @@
 // auth.ts
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import { connectDB } from "@/lib/db";
@@ -8,6 +9,10 @@ import { connectDB } from "@/lib/db";
 export const { handlers, auth, signIn, signOut } = NextAuth({
     secret: process.env.AUTH_SECRET,
     providers: [
+        Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        }),
         Credentials({
             name: "Credentials",
             credentials: {
@@ -45,9 +50,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async signIn({ user, account }) {
+            if (account?.provider === "google") {
+                try {
+                    await connectDB();
+                    let dbUser = await User.findOne({ email: user.email });
+
+                    if (!dbUser) {
+                        dbUser = await User.create({
+                            name: user.name,
+                            email: user.email,
+                            role: "student",
+                        });
+                    }
+                    return true;
+                } catch (error) {
+                    console.error("Google signIn error:", error);
+                    return false;
+                }
+            }
+            return true;
+        },
+        async jwt({ token, user, account }) {
             if (user) {
                 token.role = user.role; // Attach role to token 
+            }
+            if (account?.provider === "google") {
+                await connectDB();
+                const dbUser = await User.findOne({ email: token.email });
+                if (dbUser) {
+                    token.role = dbUser.role;
+                    token.sub = dbUser._id.toString();
+                }
             }
             return token;
         },

@@ -53,7 +53,7 @@ export async function updateFeedbackStatus(id: string, status: string) {
         }
 
         const updated = await Feedback.findByIdAndUpdate(id, { status }, { new: true });
-        
+
         return { success: true, feedback: JSON.parse(JSON.stringify(updated)) };
     } catch (error: unknown) {
         console.error("Failed to update feedback status:", error);
