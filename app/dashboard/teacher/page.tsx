@@ -9,8 +9,9 @@ export default async function TeacherDashboard() {
 
     if (!session || (session.user.role !== 'teacher' && session.user.role !== 'admin')) {
         redirect("/login");
-    }
 
+    }
+    console.log(session);
     const history = await getTeacherCourses(session.user.id);
 
     return (
@@ -68,13 +69,13 @@ export default async function TeacherDashboard() {
                                             <span className="text-sm text-slate-600 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">Semester: <span className="font-semibold text-slate-800">{course.semester}</span></span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                                         <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                                             <Users size={16} className="text-slate-400" />
                                             {course.studentCount} Students
                                         </div>
-                                        <Link 
+                                        <Link
                                             href={`/dashboard/teacher/${course.courseId}?${queryParams}`}
                                             className="text-blue-600 font-semibold text-sm flex items-center gap-1 group-hover:text-blue-700 transition"
                                         >

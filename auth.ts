@@ -73,7 +73,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
         async jwt({ token, user, account }) {
             if (user) {
-                token.role = user.role; // Attach role to token 
+                token.role = user.role; // Attach role to token
+                if (user.id) token.sub = user.id;
             }
             if (account?.provider === "google") {
                 await connectDB();
@@ -86,8 +87,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            if (token?.role && session.user) {
-                session.user.role = token.role as string; // Attach role to session 
+            if (session.user) {
+                if (token.role) session.user.role = token.role as string;
+                if (token.sub) session.user.id = token.sub;
             }
             return session;
         },
