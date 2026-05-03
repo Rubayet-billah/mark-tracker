@@ -8,14 +8,18 @@ import { signIn } from 'next-auth/react';
 export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const fillDemoCredentials = () => {
+        setEmail('demo@marktracker.com');
+        setPassword('demo@123');
+        setError('');
+    };
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setError('');
-
-        const formData = new FormData(event.currentTarget);
-        const email = formData.get('email')?.toString().trim() ?? '';
-        const password = formData.get('password')?.toString() ?? '';
 
         if (!email || !password) {
             setError('Please enter both email and password.');
@@ -40,12 +44,32 @@ export default function LoginPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-lg border p-8">
                 {/* Header */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                     <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                         <GraduationCap className="text-blue-600" size={32} />
                     </div>
                     <h1 className="text-2xl font-bold">Welcome Back</h1>
                     <p className="text-gray-500">Sign in to view or manage academic marks</p>
+                </div>
+
+                {/* Demo Credentials Hint */}
+                <div className="mb-6 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm flex items-start gap-3">
+                    <div className="bg-blue-100 text-blue-700 p-1.5 rounded-lg">
+                        <LogIn size={18} />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="font-semibold text-slate-800 mb-1">Demo Account Available</h4>
+                        <p className="text-slate-600 mb-3 text-xs leading-relaxed">
+                            Use our pre-configured demo account to quickly explore the platform&apos;s features and teacher dashboard.
+                        </p>
+                        <button 
+                            type="button" 
+                            onClick={fillDemoCredentials}
+                            className="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-blue-600 font-medium py-1.5 px-3 rounded-md text-xs transition-colors shadow-sm"
+                        >
+                            Auto-fill Demo Credentials
+                        </button>
+                    </div>
                 </div>
 
                 {/* Login Form */}
@@ -60,6 +84,8 @@ export default function LoginPage() {
                         <input
                             name="email"
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="name@university.edu"
                             className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                             required
@@ -71,6 +97,8 @@ export default function LoginPage() {
                         <input
                             name="password"
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
                             required
